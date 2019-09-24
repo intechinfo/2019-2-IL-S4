@@ -18,12 +18,12 @@ end;
 create table ps.tSchool
 (
 	EntityId  int identity(0, 1),
-	FirstName nvarchar(32),
-	LastName  nvarchar(32),
+	FirstName nvarchar(32) collate Latin1_General_100_CI_AS,
+	LastName  nvarchar(32) collate Latin1_General_100_CI_AS,
 	BirthDate datetime2,
 	ClassId   int,
-	ClassName nvarchar(8),
-	[Level]   varchar(3),
+	ClassName nvarchar(8) collate Latin1_General_100_CI_AS,
+	[Level]   varchar(3) collate Latin1_General_100_CI_AS,
 	TeacherId int,
 
 	constraint PK_ps_tSchool primary key(EntityId),
