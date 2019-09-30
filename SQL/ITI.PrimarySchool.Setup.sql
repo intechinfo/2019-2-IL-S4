@@ -16,6 +16,30 @@ begin
 end;
 
 if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sStudentCreate' and s.[name] = 'ps')
+begin
+	drop proc ps.sStudentCreate;
+end;
+
+if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sClassCreate' and s.[name] = 'ps')
+begin
+	drop proc ps.sClassCreate;
+end;
+
+if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sStudentAssignClass' and s.[name] = 'ps')
+begin
+	drop proc ps.sStudentAssignClass;
+end;
+
+if exists(select *
           from sys.tables t inner join sys.schemas s on s.[schema_id] = t.[schema_id]
 		  where t.[name] = 'tStudent' and s.[name] = 'ps')
 begin
@@ -99,3 +123,43 @@ as
 		inner join ps.tClass c on c.ClassId = s.ClassId
 		inner join ps.tTeacher t on t.TeacherId = c.TeacherId
 	where s.StudentId <> 0;
+GO
+
+create proc ps.sStudentCreate
+(
+	@FirstName nvarchar(32),
+	@LastName nvarchar(32),
+	@BirthDate datetime2,
+	@StudentId int out
+)
+as
+begin
+	insert into ps.tStudent(FirstName,  LastName,  BirthDate,  ClassId)
+	                 values(@FirstName, @LastName, @BirthDate, 0);
+
+	set @StudentId = scope_identity();
+	return 0;
+end;
+GO
+
+create proc ps.sClassCreate
+(
+	@Name nvarchar(8),
+	@Level varchar(3),
+	@ClassId int out
+)
+as
+begin
+	return 0;
+end;
+GO
+
+create proc ps.sStudentAssignClass
+(
+	@StudentId int,
+	@ClassId int
+)
+as
+begin
+	return 0;
+end;
