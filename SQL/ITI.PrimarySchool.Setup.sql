@@ -8,6 +8,14 @@ if not exists (select * from sys.schemas where [name] = 'ps') exec('create schem
 GO
 
 if exists(select *
+          from sys.views v
+          	inner join sys.schemas s on s.[schema_id] = v.[schema_id]
+          where v.[name] = 'vStudent' and s.[name] = 'ps')
+begin
+	drop view ps.vStudent;
+end;
+
+if exists(select *
           from sys.tables t inner join sys.schemas s on s.[schema_id] = t.[schema_id]
 		  where t.[name] = 'tStudent' and s.[name] = 'ps')
 begin
@@ -72,3 +80,22 @@ create table ps.tStudent
 );
 
 insert into ps.tStudent(FirstName, LastName, BirthDate, ClassId) values(N'', N'', '00010101', 0);
+GO
+
+create view ps.vStudent
+as
+	select
+		StudentId = s.StudentId,
+		FirstName = s.FirstName,
+		LastName = s.LastName,
+		BirthDate = s.BirthDate,
+		ClassId = c.ClassId,
+		ClassName = case when c.ClassId <> 0 then c.[Name] else N'' end,
+		[Level] = case when c.ClassId <> 0 then c.[Level] else '' end,
+		TeacherId = t.TeacherId,
+		TeacherFirstName = case when t.TeacherId <> 0 then t.FirstName else N'' end,
+		TeacherLastName = case when t.TeacherId <> 0 then t.LastName else N'' end
+	from ps.tStudent s
+		inner join ps.tClass c on c.ClassId = s.ClassId
+		inner join ps.tTeacher t on t.TeacherId = c.TeacherId
+	where s.StudentId <> 0;
