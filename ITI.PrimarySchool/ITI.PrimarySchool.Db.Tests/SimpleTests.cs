@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
+using Dapper;
 using NUnit.Framework;
 
 namespace ITI.PrimarySchool.Db.Tests
@@ -10,7 +12,7 @@ namespace ITI.PrimarySchool.Db.Tests
         static readonly string ConnectionString = "Server=.;Database=PrimarySchool;Trusted_Connection=True;";
 
         [Test]
-        public void get_teachers()
+        public async Task get_teachers()
         {
             using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             using (SqlCommand command = new SqlCommand(
@@ -19,11 +21,11 @@ namespace ITI.PrimarySchool.Db.Tests
                   where t.TeacherId <> 0;",
                 sqlConnection))
             {
-                sqlConnection.Open();
+                await sqlConnection.OpenAsync();
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
 
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         int id = (int)reader["TeacherId"];
                         string firstName = (string)reader["FirstName"];
@@ -36,44 +38,73 @@ namespace ITI.PrimarySchool.Db.Tests
         }
 
         [Test]
-        public void insert_new_teacher()
+        public async Task insert_new_teacher()
         {
-            using(SqlConnection conn = new SqlConnection(ConnectionString))
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
-                conn.Open();
+                await conn.OpenAsync();
                 string firstName = GetRandomName();
                 string lastName = GetRandomName();
-                string cmd = $@"insert into ps.tTeacher(FirstName,  LastName)
-                                                 values(@FirstName, @LastName);";
+                string cmd = @"insert into ps.tTeacher(FirstName,  LastName)
+                                                values(@FirstName, @LastName);";
 
-                using(SqlCommand command = new SqlCommand(cmd, conn))
+                using (SqlCommand command = new SqlCommand(cmd, conn))
                 {
                     command.Parameters.AddWithValue("@FirstName", firstName);
                     command.Parameters.AddWithValue("@LastName", lastName);
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
 
-                cmd = $@"select t.TeacherId
-                         from ps.tTeacher t
-                         where t.FirstName = @FirstName
-                           and t.LastName = @LastName;";
+                cmd = @"select t.TeacherId
+                        from ps.tTeacher t
+                        where t.FirstName = @FirstName
+                          and t.LastName = @LastName;";
 
                 int teacherId;
                 using (SqlCommand command = new SqlCommand(cmd, conn))
                 {
                     command.Parameters.AddWithValue("@FirstName", firstName);
                     command.Parameters.AddWithValue("@LastName", lastName);
-                    object id = command.ExecuteScalar();
+                    object id = await command.ExecuteScalarAsync();
                     Assert.That(id, Is.Not.Null);
                     teacherId = (int)id;
                 }
 
-                cmd = $"delete from ps.tTeacher where TeacherId = @TeacherId;";
-                using(SqlCommand command = new SqlCommand(cmd, conn))
+                cmd = "delete from ps.tTeacher where TeacherId = @TeacherId;";
+                using (SqlCommand command = new SqlCommand(cmd, conn))
                 {
                     command.Parameters.AddWithValue("@TeacherId", teacherId);
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
+            }
+        }
+
+        [Test]
+        public async Task insert_new_teacher_with_dapper()
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                string firstName = GetRandomName();
+                string lastName = GetRandomName();
+                await conn.ExecuteAsync(
+                    @"insert into ps.tTeacher(FirstName,  LastName)
+                                       values(@FirstName, @LastName);",
+                    new { FirstName = firstName, LastName = lastName });
+
+                int teacherId = 0;
+                Assert.DoesNotThrowAsync(async () =>
+                {
+                    teacherId = await conn.ExecuteScalarAsync<int>(
+                        @"select t.TeacherId
+                          from ps.tTeacher t
+                          where t.FirstName = @FirstName
+                            and t.LastName = @LastName;",
+                        new { FirstName = firstName, LastName = lastName });
+                });
+
+                await conn.ExecuteAsync(
+                    "delete from ps.tTeacher where TeacherId = @TeacherId;",
+                    new { TeacherId = teacherId });
             }
         }
 
