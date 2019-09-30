@@ -172,6 +172,97 @@ namespace ITI.PrimarySchool.Db.Tests
             }
         }
 
+        [Test]
+        public async Task get_teacher_level()
+        {
+            using(SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                Teacher t = await CreateTeacher(conn);
+                Class c = await CreateClass(conn);
+                await AssignClass(conn, t.TeacherId, c.ClassId);
+
+                string level = await conn.ExecuteScalarAsync<string>(
+                    "select t.[Level] from ps.vTeacher t where t.TeacherId = @TeacherId;",
+                    new { TeacherId = t.TeacherId });
+                Assert.That(level, Is.EqualTo(c.Level));
+
+                await DeleteTeacher(conn, t.TeacherId);
+                await DeleteClass(conn, c.ClassId);
+            }
+        }
+
+        async Task DeleteClass(SqlConnection conn, int classId)
+        {
+            DynamicParameters parameters = new DynamicParameters(new { ClassId = classId });
+            parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+            await conn.ExecuteAsync("ps.sClassDelete", parameters, commandType: CommandType.StoredProcedure);
+
+            Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
+        }
+
+        async Task DeleteTeacher(SqlConnection conn, int teacherId)
+        {
+            DynamicParameters parameters = new DynamicParameters(new { TeacherId = teacherId });
+            parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+            await conn.ExecuteAsync("ps.sTeacherDelete", parameters, commandType: CommandType.StoredProcedure);
+
+            Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
+        }
+
+        async Task AssignClass(SqlConnection conn, int teacherId, int classId)
+        {
+            DynamicParameters parameters = new DynamicParameters(new { TeacherId = teacherId, ClassId = classId });
+            parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+            await conn.ExecuteAsync("ps.sTeacherAssignClass", parameters, commandType: CommandType.StoredProcedure);
+
+            Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
+        }
+
+        async Task<Class> CreateClass(SqlConnection conn)
+        {
+            string name = GetRandomClassName();
+            string level = GetRandomLevel();
+
+            DynamicParameters parameters = new DynamicParameters(new { Name = name, Level = level });
+            parameters.Add("ClassId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+            await conn.ExecuteAsync("ps.sClassCreate", parameters, commandType: CommandType.StoredProcedure);
+
+            Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
+
+            int classId = parameters.Get<int>("ClassId");
+
+            return new Class
+            {
+                ClassId = classId,
+                Name = name,
+                Level = level,
+                TeacherId = 0
+            };
+        }
+
+        async Task<Teacher> CreateTeacher(SqlConnection conn)
+        {
+            string firstName = GetRandomName();
+            string lastName = GetRandomName();
+
+            DynamicParameters parameters = new DynamicParameters(new { FirstName = firstName, LastName = lastName });
+            parameters.Add("TeacherId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+            await conn.ExecuteAsync("ps.sTeacherCreate", parameters, commandType: CommandType.StoredProcedure);
+
+            Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
+
+            int teacherId = parameters.Get<int>("TeacherId");
+
+            return new Teacher
+            {
+                TeacherId = teacherId,
+                FirstName = firstName,
+                LastName = lastName
+            };
+        }
+
         static string GetRandomName() => string.Format("Test-{0}", Guid.NewGuid().ToString().Substring(0, 16));
 
         static string GetRandomClassName() => GetRandomName().Substring(0, 8);
