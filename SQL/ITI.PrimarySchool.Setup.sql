@@ -150,10 +150,22 @@ create proc ps.sStudentCreate
 )
 as
 begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if exists(select * from ps.tStudent s where s.FirstName = @FirstName and s.LastName = @LastName)
+	begin
+		rollback;
+		return 1;
+	end;
+
 	insert into ps.tStudent(FirstName,  LastName,  BirthDate,  ClassId)
 	                 values(@FirstName, @LastName, @BirthDate, 0);
 
 	set @StudentId = scope_identity();
+	commit;
 	return 0;
 end;
 GO
@@ -166,6 +178,29 @@ create proc ps.sClassCreate
 )
 as
 begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if @Level not in('CP', 'CE1', 'CE2', 'CM1', 'CM2')
+	begin
+		rollback;
+		return 1;
+	end;
+
+	if exists(select * from ps.tClass c where c.[Name] = @Name)
+	begin
+		rollback;
+		return 2;
+	end;
+
+	insert into ps.tClass([Name], [Level], TeacherId)
+	               values(@Name,  @Level,  0);
+
+	set @ClassId = scope_identity();
+
+	commit;
 	return 0;
 end;
 GO
@@ -177,6 +212,25 @@ create proc ps.sStudentAssignClass
 )
 as
 begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+	if not exists(select * from ps.tClass c where c.ClassId = @ClassId)
+	begin
+		rollback;
+		return 1;
+	end;
+
+	if not exists(select * from ps.tStudent s where s.StudentId = @StudentId)
+	begin
+		rollback;
+		return 2;
+	end;
+
+	update ps.tStudent set ClassId = @ClassId where StudentId = @StudentId;
+
+	commit;
 	return 0;
 end;
 GO
@@ -187,6 +241,20 @@ create proc ps.sStudentDelete
 )
 as
 begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if not exists(select * from ps.tStudent s where s.StudentId = @StudentId)
+	begin
+		rollback;
+		return 1;
+	end;
+
+	delete from ps.tStudent where StudentId = @StudentId;
+
+	commit;
 	return 0;
 end;
 GO
@@ -197,5 +265,20 @@ create proc ps.sClassDelete
 )
 as
 begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if not exists(select * from ps.tClass c where c.ClassId = @ClassId)
+	begin
+		rollback;
+		return 1;
+	end;
+
+	update ps.tStudent set ClassId = 0 where ClassId = @ClassId;
+	delete ps.tClass where ClassId = @ClassId;
+	commit;
+
 	return 0;
 end;
