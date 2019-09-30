@@ -40,6 +40,22 @@ begin
 end;
 
 if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sStudentDelete' and s.[name] = 'ps')
+begin
+	drop proc ps.sStudentDelete;
+end;
+
+if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sClassDelete' and s.[name] = 'ps')
+begin
+	drop proc ps.sClassDelete;
+end;
+
+if exists(select *
           from sys.tables t inner join sys.schemas s on s.[schema_id] = t.[schema_id]
 		  where t.[name] = 'tStudent' and s.[name] = 'ps')
 begin
@@ -157,6 +173,26 @@ GO
 create proc ps.sStudentAssignClass
 (
 	@StudentId int,
+	@ClassId int
+)
+as
+begin
+	return 0;
+end;
+GO
+
+create proc ps.sStudentDelete
+(
+	@StudentId int
+)
+as
+begin
+	return 0;
+end;
+GO
+
+create proc ps.sClassDelete
+(
 	@ClassId int
 )
 as
