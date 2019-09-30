@@ -16,6 +16,14 @@ begin
 end;
 
 if exists(select *
+          from sys.views v
+          	inner join sys.schemas s on s.[schema_id] = v.[schema_id]
+          where v.[name] = 'vTeacher' and s.[name] = 'ps')
+begin
+	drop view ps.vTeacher;
+end;
+
+if exists(select *
           from sys.procedures p
           	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
           where p.[Name] = 'sStudentCreate' and s.[name] = 'ps')
@@ -53,6 +61,30 @@ if exists(select *
           where p.[Name] = 'sClassDelete' and s.[name] = 'ps')
 begin
 	drop proc ps.sClassDelete;
+end;
+
+if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sTeacherAssignClass' and s.[name] = 'ps')
+begin
+	drop proc ps.sTeacherAssignClass;
+end;
+
+if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sTeacherCreate' and s.[name] = 'ps')
+begin
+	drop proc ps.sTeacherCreate;
+end;
+
+if exists(select *
+          from sys.procedures p
+          	inner join sys.schemas s on s.[schema_id] = p.[schema_id]
+          where p.[Name] = 'sTeacherDelete' and s.[name] = 'ps')
+begin
+	drop proc ps.sTeacherDelete;
 end;
 
 if exists(select *
@@ -278,6 +310,104 @@ begin
 
 	update ps.tStudent set ClassId = 0 where ClassId = @ClassId;
 	delete ps.tClass where ClassId = @ClassId;
+	commit;
+
+	return 0;
+end;
+GO
+
+create proc ps.sTeacherCreate
+(
+	@FirstName nvarchar(32),
+	@LastName nvarchar(32),
+	@TeacherId int out
+)
+as
+begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if exists(select * from ps.tTeacher t where t.FirstName = @FirstName and t.LastName = @LastName)
+	begin
+		rollback;
+		return 1;
+	end;
+
+	insert into ps.tTeacher(FirstName, LastName) values(@FirstName, @LastName);
+	set @TeacherId = scope_identity();
+
+	commit;
+	return 0;
+end;
+GO
+
+create proc ps.sTeacherAssignClass
+(
+	@TeacherId int,
+	@ClassId int
+)
+as
+begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if not exists(select * from ps.tTeacher t where t.TeacherId = @TeacherId)
+	begin
+		rollback;
+		return 1;
+	end;
+
+	if not exists(select * from ps.tClass c where c.ClassId = @ClassId)
+	begin
+		rollback;
+		return 2;
+	end;
+
+	update ps.tClass set TeacherId = 0 where TeacherId = @TeacherId;
+	update ps.tClass set TeacherId = @TeacherId where ClassId = @ClassId;
+
+	commit;
+	return 0;
+end;
+GO
+
+create view ps.vTeacher
+as
+	select
+		TeacherId = t.TeacherId,
+		FirstName = t.FirstName,
+		LastName = t.LastName,
+		ClassId = coalesce(c.ClassId, 0),
+		ClassName = coalesce(c.[Name], N''),
+		ClassLevel = coalesce(c.[Level], '')
+	from ps.tTeacher t
+		left outer join ps.tClass c on c.TeacherId = t.TeacherId
+	where t.TeacherId <> 0;
+GO
+
+create proc ps.sTeacherDelete
+(
+	@TeacherId int
+)
+as
+begin
+	set xact_abort on;
+	set transaction isolation level serializable;
+
+	begin tran;
+
+	if not exists(select * from ps.tTeacher t where t.TeacherId = @TeacherId)
+	begin
+		rollback;
+		return 1;
+	end;
+
+	update ps.tClass set TeacherId = 0 where TeacherId = @TeacherId;
+	delete ps.tTeacher where TeacherId = @TeacherId;
 	commit;
 
 	return 0;

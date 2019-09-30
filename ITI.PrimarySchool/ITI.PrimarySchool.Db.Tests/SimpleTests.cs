@@ -164,7 +164,7 @@ namespace ITI.PrimarySchool.Db.Tests
                 await conn.ExecuteAsync("ps.sStudentDelete", parameters, commandType: CommandType.StoredProcedure);
                 Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
 
-                parameters = new DynamicParameters(new { ClassId = studentId });
+                parameters = new DynamicParameters(new { ClassId = classId });
                 parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
                 await conn.ExecuteAsync("ps.sClassDelete", parameters, commandType: CommandType.StoredProcedure);
@@ -173,7 +173,7 @@ namespace ITI.PrimarySchool.Db.Tests
         }
 
         [Test]
-        public async Task get_teacher_level()
+        public async Task get_teacher()
         {
             using(SqlConnection conn = new SqlConnection(ConnectionString))
             {
@@ -181,10 +181,26 @@ namespace ITI.PrimarySchool.Db.Tests
                 Class c = await CreateClass(conn);
                 await AssignClass(conn, t.TeacherId, c.ClassId);
 
-                string level = await conn.ExecuteScalarAsync<string>(
-                    "select t.[Level] from ps.vTeacher t where t.TeacherId = @TeacherId;",
-                    new { TeacherId = t.TeacherId });
-                Assert.That(level, Is.EqualTo(c.Level));
+                int count = await conn.ExecuteScalarAsync<int>(
+                    @"select count(*)
+                      from ps.vTeacher t
+                      where t.TeacherId = @TeacherId
+                        and t.FirstName = @FirstName
+                        and t.LastName = @LastName
+                        and t.ClassId = @ClassId
+                        and t.ClassName = @ClassName
+                        and t.ClassLevel = @ClassLevel;",
+                    new
+                    {
+                        TeacherId = t.TeacherId,
+                        FirstName = t.FirstName,
+                        LastName = t.LastName,
+                        ClassId = c.ClassId,
+                        ClassName = c.Name,
+                        ClassLevel = c.Level
+                    });
+
+                Assert.That(count, Is.EqualTo(1));
 
                 await DeleteTeacher(conn, t.TeacherId);
                 await DeleteClass(conn, c.ClassId);
