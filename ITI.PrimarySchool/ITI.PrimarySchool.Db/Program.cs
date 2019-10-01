@@ -18,6 +18,7 @@ namespace ITI.PrimarySchool.Db
                     .LogToConsole()
                     .Build();
 
+            EnsureDatabase.For.SqlDatabase(connectionString);
             var result = upgrader.PerformUpgrade();
 
             if (!result.Successful)
