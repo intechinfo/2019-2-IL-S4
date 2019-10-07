@@ -2,7 +2,7 @@ using System;
 
 namespace ITI.PrimarySchool.WebApp.Services
 {
-    public class WinOrLoseService
+    public class WinOrLoseService : IWinOrLoseService
     {
         public bool WinOrLose()
         {

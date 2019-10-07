@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using ITI.PrimarySchool.WebApp.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace ITI.PrimarySchool.WebApp.Middlewares
@@ -14,7 +15,7 @@ namespace ITI.PrimarySchool.WebApp.Middlewares
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context, WinOrLoseService winOrLoseService)
+        public async Task Invoke(HttpContext context, IWinOrLoseService winOrLoseService)
         {
             if (winOrLoseService.WinOrLose())
             {
@@ -26,6 +27,14 @@ namespace ITI.PrimarySchool.WebApp.Middlewares
                 await context.Response.WriteAsync(Environment.NewLine);
                 await _next(context);
             }
+        }
+    }
+
+    public static class IApplicationBuilderExtensions
+    {
+        public static IApplicationBuilder UseWinOrLoseMiddleWare(this IApplicationBuilder @this)
+        {
+            return @this.UseMiddleware<WinOrLoseMiddleware>();
         }
     }
 }

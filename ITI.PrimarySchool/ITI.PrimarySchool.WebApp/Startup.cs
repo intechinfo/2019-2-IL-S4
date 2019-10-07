@@ -12,12 +12,12 @@ namespace ITI.PrimarySchool.WebApp
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<WinOrLoseService>();
+            services.AddSingleton<IWinOrLoseService, WinOrLoseService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseMiddleware<WinOrLoseMiddleware>();
+            app.UseWinOrLoseMiddleWare();
 
             app.Use(async (context, next) =>
             {
