@@ -1,50 +1,33 @@
 ﻿using System;
-using ITI.PrimarySchool.WebApp.Middlewares;
-using ITI.PrimarySchool.WebApp.Services;
+using ITI.PrimarySchool.DAL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ITI.PrimarySchool.WebApp
 {
     public class Startup
     {
+        readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            _configuration = configuration;
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IWinOrLoseService, WinOrLoseService>();
+            string connectionString = _configuration["ConnectionStrings:PrimarySchool"];
+
+            services.AddMvc();
+            services.AddSingleton(_ => new StudentGateway(connectionString));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseWinOrLoseMiddleWare();
-
-            app.Use(async (context, next) =>
-            {
-                var request = context.Request;
-                var queryCollection = request.Query;
-                bool callNext = true;
-                foreach (var arg in queryCollection)
-                {
-                    callNext = false;
-                    var values = arg.Value;
-                    foreach (var v in values)
-                    {
-                        string s = string.Format("Key: {0} - Value: {1}", arg.Key, v);
-                        await context.Response.WriteAsync(s);
-                        await context.Response.WriteAsync(Environment.NewLine);
-                    }
-                }
-
-                if (callNext) await next();
-
-                await context.Response.WriteAsync("in'tech 2019");
-            });
-
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            app.UseMvcWithDefaultRoute();
         }
     }
 }
