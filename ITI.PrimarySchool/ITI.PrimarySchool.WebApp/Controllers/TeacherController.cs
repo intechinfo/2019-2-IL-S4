@@ -42,7 +42,10 @@ namespace ITI.PrimarySchool.WebApp.Controllers
         [HttpGet("{teacherId}")]
         public async Task<IActionResult> Get(int teacherId)
         {
-            throw new NotImplementedException();
+            TeacherData teacher = await _teacherGateway.GetById(teacherId);
+            if( teacher == null ) return NotFound();
+
+            return Ok(teacher);
         }
     }
 }

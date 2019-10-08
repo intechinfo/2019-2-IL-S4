@@ -51,5 +51,17 @@ namespace ITI.PrimarySchool.DAL
                 throw new Exception("Unknown status");
             }
         }
+
+        public async Task<TeacherData> GetById(int teacherId)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                return await conn.QuerySingleOrDefaultAsync<TeacherData>(
+                    @"select t.TeacherId, t.FirstName, t.LastName
+                      from ps.vTeacher t
+                      where t.TeacherId = @TeacherId;",
+                    new { TeacherId = teacherId });
+            }
+        }
     }
 }
