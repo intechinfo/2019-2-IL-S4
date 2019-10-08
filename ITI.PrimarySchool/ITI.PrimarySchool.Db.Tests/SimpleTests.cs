@@ -11,9 +11,7 @@ namespace ITI.PrimarySchool.Db.Tests
     public class SimpleTests
     {
         static readonly string ConnectionString = "Server=.;Database=PrimarySchool;Trusted_Connection=True;";
-        static readonly Random Random = new Random();
-        static readonly string[] Levels = new[] { "CP", "CE1", "CE2", "CM1", "CM2" };
-
+        
         [Test]
         public async Task get_teachers()
         {
@@ -46,8 +44,8 @@ namespace ITI.PrimarySchool.Db.Tests
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 await conn.OpenAsync();
-                string firstName = GetRandomName();
-                string lastName = GetRandomName();
+                string firstName = TestHelpers.GetRandomName();
+                string lastName = TestHelpers.GetRandomName();
                 string cmd = @"insert into ps.tTeacher(FirstName,  LastName)
                                                 values(@FirstName, @LastName);";
 
@@ -87,8 +85,8 @@ namespace ITI.PrimarySchool.Db.Tests
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
-                string firstName = GetRandomName();
-                string lastName = GetRandomName();
+                string firstName = TestHelpers.GetRandomName();
+                string lastName = TestHelpers.GetRandomName();
                 await conn.ExecuteAsync(
                     @"insert into ps.tTeacher(FirstName,  LastName)
                                        values(@FirstName, @LastName);",
@@ -116,9 +114,9 @@ namespace ITI.PrimarySchool.Db.Tests
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
-                string firstName = GetRandomName();
-                string lastName = GetRandomName();
-                DateTime birthDate = GetRandomBirthDate();
+                string firstName = TestHelpers.GetRandomName();
+                string lastName = TestHelpers.GetRandomName();
+                DateTime birthDate = TestHelpers.GetRandomBirthDate();
 
                 DynamicParameters parameters = new DynamicParameters(
                     new { FirstName = firstName, LastName = lastName, BirthDate = birthDate });
@@ -130,8 +128,8 @@ namespace ITI.PrimarySchool.Db.Tests
                 Assert.That(result, Is.EqualTo(0));
                 int studentId = parameters.Get<int>("StudentId");
 
-                string className = GetRandomClassName();
-                string level = GetRandomLevel();
+                string className = TestHelpers.GetRandomClassName();
+                string level = TestHelpers.GetRandomLevel();
 
                 parameters = new DynamicParameters(new { Name = className, Level = level });
                 parameters.Add("ClassId", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -236,8 +234,8 @@ namespace ITI.PrimarySchool.Db.Tests
 
         async Task<Class> CreateClass(SqlConnection conn)
         {
-            string name = GetRandomClassName();
-            string level = GetRandomLevel();
+            string name = TestHelpers.GetRandomClassName();
+            string level = TestHelpers.GetRandomLevel();
 
             DynamicParameters parameters = new DynamicParameters(new { Name = name, Level = level });
             parameters.Add("ClassId", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -259,8 +257,8 @@ namespace ITI.PrimarySchool.Db.Tests
 
         async Task<Teacher> CreateTeacher(SqlConnection conn)
         {
-            string firstName = GetRandomName();
-            string lastName = GetRandomName();
+            string firstName = TestHelpers.GetRandomName();
+            string lastName = TestHelpers.GetRandomName();
 
             DynamicParameters parameters = new DynamicParameters(new { FirstName = firstName, LastName = lastName });
             parameters.Add("TeacherId", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -279,12 +277,6 @@ namespace ITI.PrimarySchool.Db.Tests
             };
         }
 
-        static string GetRandomName() => string.Format("Test-{0}", Guid.NewGuid().ToString().Substring(0, 16));
-
-        static string GetRandomClassName() => GetRandomName().Substring(0, 8);
-
-        static DateTime GetRandomBirthDate() => DateTime.UtcNow.Date.AddDays(Random.Next(-365 * 10 , - 365 * 5));
-
-        static string GetRandomLevel() => Levels[Random.Next(5)];
+        
     }
 }
