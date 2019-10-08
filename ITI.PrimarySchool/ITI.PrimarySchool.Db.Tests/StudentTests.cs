@@ -41,7 +41,12 @@ namespace ITI.PrimarySchool.Db.Tests
                 Assert.That(student.LastName, Is.EqualTo(testData.LastName));
                 Assert.That(student.BirthDate, Is.EqualTo(testData.BirthDate));
 
+                parameters = new DynamicParameters(new { StudentId = studentId });
+                parameters.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
 
+                await conn.ExecuteAsync("ps.sStudentDelete", parameters, commandType: CommandType.StoredProcedure);
+
+                Assert.That(parameters.Get<int>("Result"), Is.EqualTo(0));
             }
         }
     }
