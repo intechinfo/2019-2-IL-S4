@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ITI.PrimarySchool.DAL;
+using ITI.PrimarySchool.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITI.PrimarySchool.WebApp.Controllers
@@ -22,6 +23,26 @@ namespace ITI.PrimarySchool.WebApp.Controllers
         {
             IEnumerable<TeacherData> teachers = await _teacherGateway.GetAll();
             return Ok(teachers);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTeacherModel model)
+        {
+            Result<int> result = await _teacherGateway.Create(model.FirstName, model.LastName);
+            if (result.IsSuccess)
+            {
+                return Ok(new { IsSuccess = true, TeacherId = result.Value });
+            }
+            else
+            {
+                return BadRequest(new { IsSuccess = false, ErrorMessage = result.ErrorMessage });
+            }
+        }
+
+        [HttpGet("{teacherId}")]
+        public async Task<IActionResult> Get(int teacherId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
