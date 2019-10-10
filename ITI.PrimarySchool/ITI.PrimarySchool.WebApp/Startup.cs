@@ -20,10 +20,8 @@ namespace ITI.PrimarySchool.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             string connectionString = _configuration["ConnectionStrings:PrimarySchool"];
-
             services.AddMvc();
-            services.AddSingleton(_ => new StudentGateway(connectionString));
-            services.AddSingleton(_ => new TeacherGateway(connectionString));
+            services.AddSingleton(_ => new ClassGateway(connectionString));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

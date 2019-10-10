@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ITI.PrimarySchool.DAL;
 using Microsoft.AspNetCore.Mvc;
@@ -7,17 +8,23 @@ namespace ITI.PrimarySchool.WebApp.Controllers
 {
     public class ClassController : Controller
     {
+        readonly ClassGateway _classGateway;
+
+        public ClassController(ClassGateway classGateway)
+        {
+            if (classGateway == null) throw new ArgumentNullException(nameof(classGateway));
+            _classGateway = classGateway;
+        }
+
         public async Task<IActionResult> All()
         {
-            ClassGateway gateway = new ClassGateway();
-            IEnumerable<ClassData> viewModel = await gateway.GetAll();
+            IEnumerable<ClassData> viewModel = await _classGateway.GetAll();
             return View(viewModel);
         }
 
         public async Task<IActionResult> Index(int id)
         {
-            ClassGateway gateway = new ClassGateway();
-            ClassData viewModel = await gateway.GetById(id);
+            ClassData viewModel = await _classGateway.GetById(id);
             if(viewModel != null) return View(viewModel);
 
             return NotFound();
