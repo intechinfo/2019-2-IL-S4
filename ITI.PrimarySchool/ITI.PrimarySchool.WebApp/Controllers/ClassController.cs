@@ -12,8 +12,7 @@ namespace ITI.PrimarySchool.WebApp.Controllers
         public async Task<IActionResult> Index()
         {
             ClassGateway gateway = new ClassGateway();
-            IEnumerable<ClassData> classes = await gateway.GetAll();
-            ViewBag.Classes = classes;
+            ViewBag.Classes = await gateway.GetAll();
             return View();
         }
     }

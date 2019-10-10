@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
+using Dapper;
 
 namespace ITI.PrimarySchool.DAL
 {
@@ -7,7 +9,10 @@ namespace ITI.PrimarySchool.DAL
     {
         public async Task<IEnumerable<ClassData>> GetAll()
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = new SqlConnection("Server=.;Database=PrimarySchool;Trusted_Connection=True;"))
+            {
+                return await conn.QueryAsync<ClassData>("select c.ClassId, c.Name, c.[Level] from ps.vClass c;");
+            }
         }
     }
 

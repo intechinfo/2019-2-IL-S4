@@ -1,12 +1,18 @@
-@{ 
-    Guid guid = Guid.NewGuid();
-    byte[] bytes = guid.ToByteArray();
-    byte n0 = bytes[0];
-    byte n1 = bytes[1];
-    int sum = n0 + n1;
-}
-<p>
-    n0: @n0<br />
-    n1: @n1<br />
-    sum: @sum
-</p>
+@using ITI.PrimarySchool.DAL
+
+<table>
+    <tr>
+        <td>Class Id</td>
+        <td>Name</td>
+        <td>Level</td>
+    </tr>
+
+    @foreach (ClassData c in ViewBag.Classes)
+    {
+    <tr>
+        <td>@c.ClassId</td>
+        <td>@c.Name</td>
+        <td>@c.Level</td>
+    </tr>
+    }
+</table>
