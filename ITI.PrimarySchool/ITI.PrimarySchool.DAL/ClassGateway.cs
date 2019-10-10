@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Extensions.Options;
 
 namespace ITI.PrimarySchool.DAL
 {
     public class ClassGateway
     {
-        readonly string _connectionString;
+        readonly IOptions<GatewayOptions> _options;
 
-        public ClassGateway(string connectionString)
+        public ClassGateway(IOptions<GatewayOptions> options)
         {
-            if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
-            _connectionString = connectionString;
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            _options = options;
         }
 
         public async Task<IEnumerable<ClassData>> GetAll()
         {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
             {
                 return await conn.QueryAsync<ClassData>("select c.ClassId, c.Name, c.[Level] from ps.vClass c;");
             }
@@ -26,7 +27,7 @@ namespace ITI.PrimarySchool.DAL
 
         public async Task<ClassData> GetById(int classId)
         {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
             {
                 return await conn.QuerySingleOrDefaultAsync<ClassData>(
                     "select c.ClassId, c.Name, c.[Level] from ps.vClass c where c.ClassId = @ClassId;",
