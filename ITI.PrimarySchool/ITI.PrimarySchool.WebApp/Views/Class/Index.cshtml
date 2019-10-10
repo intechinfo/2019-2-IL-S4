@@ -1,0 +1,12 @@
+@{ 
+    Guid guid = Guid.NewGuid();
+    byte[] bytes = guid.ToByteArray();
+    byte n0 = bytes[0];
+    byte n1 = bytes[1];
+    int sum = n0 + n1;
+}
+<p>
+    n0: @n0<br />
+    n1: @n1<br />
+    sum: @sum
+</p>
