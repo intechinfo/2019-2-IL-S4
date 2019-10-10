@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ITI.PrimarySchool.DAL;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +16,11 @@ namespace ITI.PrimarySchool.WebApp.Controllers
 
         public async Task<IActionResult> Index(int id)
         {
-            throw new NotImplementedException();
+            ClassGateway gateway = new ClassGateway();
+            ClassData viewModel = await gateway.GetById(id);
+            if(viewModel != null) return View(viewModel);
+
+            return NotFound();
         }
     }
 }
