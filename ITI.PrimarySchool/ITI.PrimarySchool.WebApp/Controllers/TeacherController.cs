@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ITI.PrimarySchool.WebApp.Controllers
 {
-    [Route("/api/teacher")]
+    [Route("/api/[controller]")]
     public class TeacherController : Controller
     {
         readonly TeacherGateway _teacherGateway;
@@ -20,9 +20,6 @@ namespace ITI.PrimarySchool.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // System.InvalidOperationException: Unable to resolve service for type
-            // 'System.String' while attempting to activate
-            // 'ITI.PrimarySchool.DAL.TeacherGateway'.
             IEnumerable<TeacherData> teachers = await _teacherGateway.GetAll();
             return Ok(teachers);
         }
