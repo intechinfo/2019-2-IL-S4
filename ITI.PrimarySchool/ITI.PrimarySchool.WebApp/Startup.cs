@@ -26,6 +26,7 @@ namespace ITI.PrimarySchool.WebApp
 
             services.AddMvc();
             services.AddSingleton<ClassGateway>();
+            services.AddSingleton<TeacherGateway>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

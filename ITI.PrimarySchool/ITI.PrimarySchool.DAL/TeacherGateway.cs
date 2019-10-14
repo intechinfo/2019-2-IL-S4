@@ -4,22 +4,23 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Extensions.Options;
 
 namespace ITI.PrimarySchool.DAL
 {
     public class TeacherGateway
     {
-        readonly string _connectionString;
+        readonly IOptions<GatewayOptions> _options;
 
-        public TeacherGateway(string connectionString)
+        public TeacherGateway(IOptions<GatewayOptions> options)
         {
-            if (string.IsNullOrWhiteSpace(connectionString)) throw new ArgumentException("The connection string must be not null nor whitespace.", nameof(connectionString));
-            _connectionString = connectionString;
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            _options = options;
         }
 
         public async Task<IEnumerable<TeacherData>> GetAll()
         {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
             {
                 return await conn.QueryAsync<TeacherData>(
                     @"select t.TeacherId, t.FirstName, t.LastName
@@ -29,7 +30,7 @@ namespace ITI.PrimarySchool.DAL
 
         public async Task<Result<int>> Create(string firstName, string lastName)
         {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
             {
                 DynamicParameters parameters = new DynamicParameters(new { FirstName = firstName, LastName = lastName });
                 parameters.Add("TeacherId", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -54,7 +55,7 @@ namespace ITI.PrimarySchool.DAL
 
         public async Task<TeacherData> GetById(int teacherId)
         {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
             {
                 return await conn.QuerySingleOrDefaultAsync<TeacherData>(
                     @"select t.TeacherId, t.FirstName, t.LastName
