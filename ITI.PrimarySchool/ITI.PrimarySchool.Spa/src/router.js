@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Counter from './views/Counter.vue'
+import TeacherList from './components/TeacherList.vue'
+import TeacherDetails from './components/TeacherDetails.vue'
 
 Vue.use(Router)
 
@@ -18,6 +20,16 @@ export default new Router({
       path: '/counter',
       name: 'counter',
       component: Counter
+    },
+    {
+      path: '/teachers',
+      name: 'teachers',
+      component: TeacherList
+    },
+    {
+      path: '/teachers/:teacherId',
+      name: 'teacher',
+      component: TeacherDetails
     }
   ]
 })

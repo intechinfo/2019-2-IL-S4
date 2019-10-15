@@ -31,6 +31,13 @@ namespace ITI.PrimarySchool.WebApp
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors(b =>
+            {
+                b.AllowAnyHeader()
+                 .AllowCredentials()
+                 .AllowAnyMethod()
+                 .WithOrigins(_configuration["Spa:Url"]);
+            });
             app.UseMvcWithDefaultRoute();
         }
     }

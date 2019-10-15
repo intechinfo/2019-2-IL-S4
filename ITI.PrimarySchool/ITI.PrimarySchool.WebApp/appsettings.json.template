@@ -1,5 +1,8 @@
 {
   "ConnectionStrings": {
     "PrimarySchool": "<connection string>"
+  },
+  "Spa": {
+    "Url": "<SPA url>"
   }
 }
