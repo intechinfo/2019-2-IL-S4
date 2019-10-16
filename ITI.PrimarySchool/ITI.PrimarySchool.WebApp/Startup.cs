@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using ITI.PrimarySchool.DAL;
+using ITI.PrimarySchool.WebApp.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,17 +22,27 @@ namespace ITI.PrimarySchool.WebApp
 
         public void ConfigureServices(IServiceCollection services)
         {
+            string secretKey = _configuration["JwtBearer:SigningKey"];
+            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+
             services.Configure<GatewayOptions>(options =>
             {
                 options.ConnectionString = _configuration["ConnectionStrings:PrimarySchool"];
             });
 
+            services.Configure<TokenProviderOptions>(options =>
+            {
+                options.Audience = _configuration["JwtBearer:Audience"];
+                options.Issuer = _configuration["JwtBearer:Issuer"];
+                options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            });
+
             services.AddMvc();
             services.AddSingleton<ClassGateway>();
             services.AddSingleton<TeacherGateway>();
-
-            string secretKey = _configuration["JwtBearer:SigningKey"];
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+            services.AddSingleton<AuthenticationGateway>();
+            services.AddSingleton<PasswordHasher>();
+            services.AddSingleton<TokenService>();
 
             services.AddAuthentication()
                 .AddJwtBearer(JwtBearerAuthentication.AuthenticationType, options =>

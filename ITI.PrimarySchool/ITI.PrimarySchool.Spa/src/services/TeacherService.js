@@ -1,3 +1,5 @@
+import { getBearer } from './AuthenticationService'
+
 const serviceUrl = process.env.VUE_APP_API_URL + '/api/teacher';
 
 export const getById = async teacherId => {
@@ -11,7 +13,11 @@ export const getAll = async () => {
 }
 
 export const deleteTeacher = async teacherId => {
+  let jwt = getBearer();
   await fetch(serviceUrl + '/' + teacherId, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer ' + jwt
+    }
   });
 }
