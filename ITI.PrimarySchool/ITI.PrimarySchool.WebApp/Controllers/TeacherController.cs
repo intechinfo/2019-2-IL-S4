@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ITI.PrimarySchool.DAL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITI.PrimarySchool.WebApp.Controllers
@@ -33,6 +34,7 @@ namespace ITI.PrimarySchool.WebApp.Controllers
         }
 
         [HttpDelete("{teacherId}")]
+        [Authorize( AuthenticationSchemes = JwtBearerAuthentication.AuthenticationType )]
         public async Task<IActionResult> Delete(int teacherId)
         {
             await _teacherGateway.Delete(teacherId);
