@@ -8,6 +8,7 @@
       Class: {{ teacher.className }}<br />
       Level: {{ teacher.level }}<br />
     </p>
+    <button @click="onDelete">Delete</button>
   </div>
 </template>
 
@@ -17,12 +18,19 @@ import { getById } from '../services/TeacherService'
 export default {
   data() {
     return {
+      teacherId: this.$route.params.teacherId,
       teacher: null
     }
   },
 
   async created() {
-    this.teacher = await getById(this.$route.params.teacherId);
+    this.teacher = await getById(this.teacherId);
+  },
+
+  methods: {
+    onDelete() {
+      this.$router.push({ name: 'deleteTeacher', params: { teacherId: this.teacherId } })
+    }
   }
 }
 </script>

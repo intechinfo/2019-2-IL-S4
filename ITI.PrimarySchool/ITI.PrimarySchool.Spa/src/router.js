@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import Counter from './views/Counter.vue'
 import TeacherList from './components/TeacherList.vue'
 import TeacherDetails from './components/TeacherDetails.vue'
+import DeleteTeacherConfirmation from './components/DeleteTeacherConfirmation.vue'
 
 Vue.use(Router)
 
@@ -30,6 +31,11 @@ export default new Router({
       path: '/teachers/:teacherId',
       name: 'teacher',
       component: TeacherDetails
+    },
+    {
+      path: '/teachers/delete/:teacherId',
+      name: 'deleteTeacher',
+      component: DeleteTeacherConfirmation
     }
   ]
 })
