@@ -53,12 +53,12 @@ namespace ITI.PrimarySchool.DAL
             }
         }
 
-        public async Task<TeacherData> GetById(int teacherId)
+        public async Task<FullTeacherData> GetById(int teacherId)
         {
             using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
             {
-                return await conn.QuerySingleOrDefaultAsync<TeacherData>(
-                    @"select t.TeacherId, t.FirstName, t.LastName
+                return await conn.QuerySingleOrDefaultAsync<FullTeacherData>(
+                    @"select t.TeacherId, t.FirstName, t.LastName, t.ClassName, [Level] = t.ClassLevel
                       from ps.vTeacher t
                       where t.TeacherId = @TeacherId;",
                     new { TeacherId = teacherId });

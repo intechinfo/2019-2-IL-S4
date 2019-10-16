@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import { getAll } from '../services/TeacherService'
+
 export default {
   data() {
     return {
@@ -25,8 +27,7 @@ export default {
   },
 
   async created() {
-    let response = await fetch('http://localhost:5000/api/teacher');
-    this.teachers = await response.json();
+    this.teachers = await getAll();
   },
 
   computed: {

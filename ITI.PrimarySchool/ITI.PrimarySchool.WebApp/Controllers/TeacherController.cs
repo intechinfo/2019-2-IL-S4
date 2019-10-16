@@ -23,5 +23,13 @@ namespace ITI.PrimarySchool.WebApp.Controllers
             IEnumerable<TeacherData> teachers = await _teacherGateway.GetAll();
             return Ok(teachers);
         }
+
+        [HttpGet("{teacherId}")]
+        public async Task<IActionResult> FindById(int teacherId)
+        {
+            FullTeacherData teacher = await _teacherGateway.GetById(teacherId);
+            if(teacher != null) return Ok(teacher);
+            return NotFound();
+        }
     }
 }
