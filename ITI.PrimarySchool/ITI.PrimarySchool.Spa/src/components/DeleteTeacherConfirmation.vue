@@ -6,21 +6,31 @@
 </template>
 
 <script>
+import { getById, deleteTeacher } from '../services/TeacherService'
+
 export default {
   data() {
     return {
-      firstName: 'firstName',
-      lastName: 'lastName'
+      firstName: '',
+      lastName: '',
+      teacherId: this.$route.params.teacherId
     }
   },
 
+  async created() {
+    let teacher = await getById(this.teacherId);
+    this.firstName = teacher.firstName;
+    this.lastName = teacher.lastName;
+  },
+
   methods: {
-    onOkClicked() {
-      console.log('onOkClicked()');
+    async onOkClicked() {
+      await deleteTeacher(this.teacherId);
+      this.$router.push({ name: 'teachers' });
     },
 
     onCancelClicked() {
-      console.log('onCancelClicked()');
+      this.$router.go(-1);
     }
   }
 }

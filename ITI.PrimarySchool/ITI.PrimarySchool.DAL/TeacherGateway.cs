@@ -53,6 +53,14 @@ namespace ITI.PrimarySchool.DAL
             }
         }
 
+        public async Task Delete(int teacherId)
+        {
+            using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))
+            {
+                await conn.ExecuteAsync("ps.sTeacherDelete", new { TeacherId = teacherId }, commandType: CommandType.StoredProcedure);
+            }
+        }
+
         public async Task<FullTeacherData> GetById(int teacherId)
         {
             using (SqlConnection conn = new SqlConnection(_options.Value.ConnectionString))

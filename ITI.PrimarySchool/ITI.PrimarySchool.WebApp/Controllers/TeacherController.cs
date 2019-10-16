@@ -31,5 +31,12 @@ namespace ITI.PrimarySchool.WebApp.Controllers
             if(teacher != null) return Ok(teacher);
             return NotFound();
         }
+
+        [HttpDelete("{teacherId}")]
+        public async Task<IActionResult> Delete(int teacherId)
+        {
+            await _teacherGateway.Delete(teacherId);
+            return Ok();
+        }
     }
 }

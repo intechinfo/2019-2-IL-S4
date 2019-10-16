@@ -9,3 +9,9 @@ export const getAll = async () => {
   let response = await fetch(serviceUrl);
   return await response.json();
 }
+
+export const deleteTeacher = async teacherId => {
+  await fetch(serviceUrl + '/' + teacherId, {
+    method: 'DELETE'
+  });
+}
